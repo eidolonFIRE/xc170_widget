@@ -1,8 +1,10 @@
 #include "telemetry.h"
 
 Telemetry telemetry;
+uint16_t lastTelemetry = 0;
 
 Telemetry* getTelemetry() { return &telemetry; }
+uint16_t getLastTelemetry() { return lastTelemetry; }
 
 char serial1Buff[20];
 void ParseSerialRX() {
@@ -15,6 +17,7 @@ void ParseSerialRX() {
       telemetry.RPM = serial1Buff[12] + (serial1Buff[13] << 8);
     }
     Serial1.flush();
+    lastTelemetry = millis() / 1000;
   }
 }
 

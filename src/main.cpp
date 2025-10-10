@@ -9,8 +9,6 @@
 #include "telemetry.h"
 #include "types.h"
 
-uint32_t runSteps = 0;
-
 BLEServer* pServer = NULL;
 BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
@@ -91,10 +89,17 @@ void loop() {
   }
 
   // NOTE: startup delay to make sure ESC has a chance to init
-  if (runSteps > 20) {
+  if ((millis() / 1000) > 20) {
+    // safety override if no serial and override not set
+    if ((getLastTelemetry() < millis() / 1000 - 60) &&
+        getFanControl()->override == 0) {
+      // Kick up the override. It can always be dialed up / down and hold state,
+      // but at least it won't be zero.
+      getFanControl()->override = 20;
+    }
+
     updateFanEsc(getTelemetry());
   }
 
   delay(500);
-  runSteps++;
 }

@@ -5,7 +5,7 @@
 struct FanControl {
   uint16_t override = 0;
   uint16_t chtMin = 210;
-  uint16_t chtMax = 230;
+  uint16_t chtMax = 240;
 };
 
 struct Telemetry {

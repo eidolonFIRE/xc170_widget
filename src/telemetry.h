@@ -11,6 +11,8 @@ Telemetry* getTelemetry();
 
 void setupTelemetry();
 
+uint16_t getLastTelemetry();
+
 class CallbackTelemetry : public BLECharacteristicCallbacks {
   void onRead(BLECharacteristic* pCharacteristic) {
     pCharacteristic->setValue((uint8_t*)(getTelemetry()), sizeof(Telemetry));
