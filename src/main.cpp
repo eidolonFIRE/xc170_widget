@@ -32,6 +32,8 @@ class MyServerCallbacks : public BLEServerCallbacks {
 };
 
 void setup() {
+  // Serial.begin(460800);
+
   setupTelemetry();
   setupFanCtrl();
   setupFuelAnalog();
@@ -66,15 +68,16 @@ void setup() {
   pAdvertising->setMinPreferred(
       0x0);  // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
+
+  delay(500);
 }
 
 void loop() {
-  // notify changed value
-  if (deviceConnected) {
-    // Regular operation stuff
-    readFuelAnalog(getTelemetry());
-    getTelemetry()->fanAmps = readFanAmps();
-  }
+  // Regular operation stuff
+  updateTelemetry();
+  readFuelAnalog(getTelemetry());
+  getTelemetry()->fanAmps = readFanAmps();
+
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
     delay(500);  // give the bluetooth stack the chance to get things ready
@@ -89,9 +92,9 @@ void loop() {
   }
 
   // NOTE: startup delay to make sure ESC has a chance to init
-  if ((millis() / 1000) > 20) {
+  if ((millis() / 1000) > 10) {
     // safety override if no serial and override not set
-    if ((getLastTelemetry() < millis() / 1000 - 60) &&
+    if ((getLastTelemetry() < (int32_t(millis()) - 60000)) &&
         getFanControl()->override == 0) {
       // Kick up the override. It can always be dialed up / down and hold state,
       // but at least it won't be zero.

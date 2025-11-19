@@ -11,7 +11,10 @@ Telemetry* getTelemetry();
 
 void setupTelemetry();
 
+// Last update in millis
 uint16_t getLastTelemetry();
+
+void updateTelemetry();
 
 class CallbackTelemetry : public BLECharacteristicCallbacks {
   void onRead(BLECharacteristic* pCharacteristic) {
