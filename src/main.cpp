@@ -73,6 +73,8 @@ void setup() {
 }
 
 void loop() {
+  delay(1000);
+
   // Regular operation stuff
   updateTelemetry();
   readFuelAnalog(getTelemetry());
@@ -80,7 +82,6 @@ void loop() {
 
   // disconnecting
   if (!deviceConnected && oldDeviceConnected) {
-    delay(500);  // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising();  // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
@@ -92,17 +93,15 @@ void loop() {
   }
 
   // NOTE: startup delay to make sure ESC has a chance to init
-  if ((millis() / 1000) > 10) {
+  if (millis() > 10000) {
     // safety override if no serial and override not set
-    if ((getLastTelemetry() < (int32_t(millis()) - 60000)) &&
+    if ((getLastTelemetry() + 60000 < millis()) &&
         getFanControl()->override == 0) {
       // Kick up the override. It can always be dialed up / down and hold state,
       // but at least it won't be zero.
-      getFanControl()->override = 20;
+      getFanControl()->override = 25;
     }
 
     updateFanEsc(getTelemetry());
   }
-
-  delay(500);
 }

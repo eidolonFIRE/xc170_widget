@@ -12,7 +12,7 @@ Telemetry* getTelemetry();
 void setupTelemetry();
 
 // Last update in millis
-uint16_t getLastTelemetry();
+uint32_t getLastTelemetry();
 
 void updateTelemetry();
 
