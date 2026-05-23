@@ -1,34 +1,38 @@
 #include "telemetry.h"
 
-#include <driver/pcnt.h>
+#include <Arduino.h>
+#include <Wire.h>
 
 #include "gpio.h"
 #include "max6675.h"
+
+// I2C configuration for RPM sensor
+#define RPM_I2C_ADDR 0x30
 
 MAX6675 CHT(GPIO_SPI_CLK, GPIO_CHT, GPIO_SPI_SDA);
 MAX6675 EGT(GPIO_SPI_CLK, GPIO_EGT, GPIO_SPI_SDA);
 
 Telemetry telemetry;
 uint32_t lastTelemetry = 0;
-pcnt_config_t config;
-volatile uint32_t rpmCounts = 0;
 
 Telemetry* getTelemetry() { return &telemetry; }
 uint32_t getLastTelemetry() { return lastTelemetry; }
 
-void IRAM_ATTR Ext_INT1_ISR() { rpmCounts++; }
-
 void setupTelemetry() {
   pinMode(GPIO_CDI, INPUT_PULLUP);
-  attachInterrupt(GPIO_CDI, Ext_INT1_ISR, RISING);
   lastTelemetry = millis();
 }
 
 void updateTelemetry() {
   auto now = millis();
 
-  telemetry.RPM = rpmCounts / ((now - lastTelemetry) / 1000.0f) * 60.0f;
-  rpmCounts = 0;
+  // Read telemetry from i2c device (16bit big-endian)
+  // Wire.beginTransmission(RPM_I2C_ADDR);
+  if (Wire.requestFrom(RPM_I2C_ADDR, 2) == 2) {
+    uint8_t highByte = Wire.read();
+    uint8_t lowByte = Wire.read();
+    telemetry.RPM = (highByte << 8) | lowByte;
+  }
 
   auto tempCHT = CHT.readCelsius();
   if (isfinite(tempCHT) && !isnan(tempCHT)) {
